@@ -23,7 +23,6 @@ import io.pravega.common.concurrent.Futures;
 import io.pravega.common.io.BoundedInputStream;
 import io.pravega.segmentstore.contracts.BadOffsetException;
 import io.pravega.segmentstore.storage.SegmentHandle;
-import io.pravega.segmentstore.storage.StorageFullException;
 import io.pravega.segmentstore.storage.StorageNotPrimaryException;
 import io.pravega.segmentstore.storage.metadata.ChunkMetadata;
 import io.pravega.segmentstore.storage.metadata.MetadataTransaction;
@@ -136,8 +135,7 @@ class WriteOperation implements Callable<CompletableFuture<Void>> {
                                                                 .thenRunAsync(this::logEnd, chunkedSegmentStorage.getExecutor()),
                                                 chunkedSegmentStorage.getExecutor());
                             }, chunkedSegmentStorage.getExecutor());
-                }, chunkedSegmentStorage.getExecutor())
-                .exceptionally(ex -> (Void) handleException(ex));
+                }, chunkedSegmentStorage.getExecutor());
     }
 
     private Object handleException(Throwable e) {
@@ -146,9 +144,6 @@ class WriteOperation implements Callable<CompletableFuture<Void>> {
         val ex = Exceptions.unwrap(e);
         if (ex instanceof StorageMetadataWritesFencedOutException) {
             throw new CompletionException(new StorageNotPrimaryException(handle.getSegmentName(), ex));
-        }
-        if (ex instanceof ChunkStorageFullException) {
-            throw new CompletionException(new StorageFullException(handle.getSegmentName(), ex));
         }
         throw new CompletionException(ex);
     }

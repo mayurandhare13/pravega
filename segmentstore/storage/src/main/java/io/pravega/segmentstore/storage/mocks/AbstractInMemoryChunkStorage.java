@@ -49,10 +49,6 @@ abstract public class AbstractInMemoryChunkStorage extends BaseChunkStorage {
     @Setter
     boolean shouldSupportConcat = false;
 
-    @Getter
-    @Setter
-    long usedSizeToReturn = 0;
-
     public AbstractInMemoryChunkStorage(Executor executor) {
         super(executor);
     }
@@ -85,11 +81,6 @@ abstract public class AbstractInMemoryChunkStorage extends BaseChunkStorage {
     @Override
     public boolean supportsConcat() {
         return shouldSupportConcat;
-    }
-
-    @Override
-    protected long doGetUsedSpace(OperationContext opContext) {
-        return usedSizeToReturn;
     }
 
     /**
